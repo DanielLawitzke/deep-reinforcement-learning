@@ -24,8 +24,9 @@ class QNetwork(nn.Module):
         # Second fully connected layer
         self.fc2 = nn.Linear(fc1_units, fc2_units)
         
-        # Output layer returns Q-values for each action
-        self.fc3 = nn.Linear(fc2_units, action_size)
+        # Dueling DQN: separate value and advantage streams
+        self.fc_value = nn.Linear(fc2_units, 1)
+        self.fc_advantage = nn.Linear(fc2_units, action_size)
 
     def forward(self, state):
         """Build a network that maps state -> action values."""
@@ -35,5 +36,9 @@ class QNetwork(nn.Module):
         # Second layer with ReLU activation
         x = F.relu(self.fc2(x))
         
-        # Output layer returns raw Q-values (no activation function)
-        return self.fc3(x)
+        # Dueling architecture: combine value and advantage streams
+        value = self.fc_value(x)
+        advantage = self.fc_advantage(x)
+        
+        # Aggregation layer: Q(s,a) = V(s) + (A(s,a) - mean(A(s,a)))
+        return value + (advantage - advantage.mean(dim=1, keepdim=True))

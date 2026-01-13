@@ -1,8 +1,8 @@
 # Navigation - Banana Collector
 
-Train an agent using Deep Q-Network (Double DQN) to collect yellow bananas while avoiding blue bananas in a Unity ML-Agents environment.
+Train an agent using Deep Q-Network (Double DQN and Dueling DQN) to collect yellow bananas while avoiding blue bananas in a Unity ML-Agents environment.
 
-**Trained on NVIDIA GeForce RTX 5080 - completed in under 30 minutes!**
+**Trained on NVIDIA GeForce RTX 5080 - both variants completed in ~15 minutes!**
 
 ## Project Overview
 
@@ -13,12 +13,15 @@ This project implements a Double DQN agent that learns to navigate a square worl
 - Action space: 4 discrete actions (forward, backward, left, right)
 - Goal: Average score >= 13.0 over 100 consecutive episodes
 
-**Results:**
-- Solved in 449 episodes (4x faster than expected!)
-- Average test score: 12.40+
-- Implementation: Double DQN with Experience Replay
-- Hardware: NVIDIA GeForce RTX 5080 16GB
-- Training time: ~15 minutes
+**Implementations:**
+- Double DQN: Solved in 449 episodes
+- Dueling DQN: Solved in 414 episodes (about 8% faster)
+- Both way faster than expected baseline (~1800 episodes)
+
+**Hardware:**
+- NVIDIA GeForce RTX 5080 16GB
+- Training time: ~15 minutes per run
+- TensorBoard logging enabled
 
 ## Environment Setup
 
@@ -84,15 +87,19 @@ Training takes approximately 20-60 minutes depending on hardware.
 
 ## Files
 
-- `model.py` - Neural network architecture (Q-Network)
+- `model.py` - Neural network architecture (supports both standard and Dueling DQN)
 - `dqn_agent.py` - DQN agent implementation with Double DQN
-- `Navigation.ipynb` - Training notebook
-- `checkpoint.pth` - Saved model weights (created after training)
+- `Navigation.ipynb` - Training notebook with TensorBoard support
+- `checkpoint_double_dqn.pth` - Trained weights for Double DQN (449 episodes)
+- `checkpoint_dueling_dqn.pth` - Trained weights for Dueling DQN (414 episodes)
 - `requirements.txt` - Python dependencies
+- `runs/` - TensorBoard logs
 
 ## Algorithm
 
-The agent uses Double DQN with the following features:
+Two implementations were tested:
+
+### Double DQN
 - Experience Replay (buffer size: 100,000)
 - Target Network (soft updates with tau=0.001)
 - Epsilon-greedy exploration (decay from 1.0 to 0.01)
@@ -101,9 +108,17 @@ The agent uses Double DQN with the following features:
 - Batch size: 64
 - Discount factor (gamma): 0.99
 
+### Dueling DQN
+Same hyperparameters as Double DQN, but with dueling architecture:
+- Splits final layer into Value stream (64 → 1) and Advantage stream (64 → 4)
+- Combines them using: Q(s,a) = V(s) + (A(s,a) - mean(A(s,a)))
+- This helps the network learn which states are valuable independent of actions
+
+Both implementations use Double DQN (action selection from local network, evaluation from target network).
+
 ## Results
 
-Training progress:
+### Double DQN Training
 ```
 Episode 100:   0.73
 Episode 200:   4.89
@@ -113,22 +128,86 @@ Episode 500:  12.76
 Episode 549:  13.00 (Solved in 449 episodes)
 ```
 
-The agent successfully learned to navigate and collect bananas in under 500 episodes.
+### Dueling DQN Training
+```
+Episode 100:   0.65
+Episode 200:   4.30
+Episode 300:   7.62
+Episode 400:  10.81
+Episode 500:  12.63
+Episode 514:  13.01 (Solved in 414 episodes)
+```
+
+### Comparison
+
+Dueling DQN was about 35 episodes faster than Double DQN. Both learned pretty much at the same pace in the beginning, but Dueling reached the goal slightly faster. The performance difference isn't huge, which makes sense since both use the same core Double DQN algorithm - Dueling just adds the value/advantage split.
+
+Overall both implementations crushed the baseline. The RTX 5080 made training super fast.
+
+### Training Plots
+
+**Double DQN - Complete Training Curve:**
+
+![Double DQN Training](double_dqn_training.png)
+
+Training progression for Double DQN. Solved in 449 episodes with clear learning curve.
+
+**Dueling DQN - Complete Training Curve:**
+
+![Dueling DQN Training](dueling_dqn_training.png)
+
+Training progression for Dueling DQN. Solved in 414 episodes, slightly faster convergence.
+
+**TensorBoard Monitoring (Dueling DQN):**
+
+![Score Average](tensorboard_score_average.png)
+
+Average score smoothly increases from 0 to 13+ over 514 episodes.
+
+![Score per Episode](tensorboard_score_episode.png)
+
+Individual episode scores with variance. The smoothed line shows clear upward trend.
+
+![Epsilon Decay](tensorboard_epsilon.png)
+
+Exploration rate (epsilon) decreases from 1.0 to ~0.08 as the agent becomes more confident.
 
 ## Testing the Trained Agent
 
 Load saved weights and watch the agent:
 ```python
-agent.qnetwork_local.load_state_dict(torch.load('checkpoint.pth'))
+# Load Double DQN weights (449 episodes)
+agent.qnetwork_local.load_state_dict(torch.load('checkpoint_double_dqn.pth'))
+
+# OR load Dueling DQN weights (414 episodes)
+agent.qnetwork_local.load_state_dict(torch.load('checkpoint_dueling_dqn.pth'))
+
 # Run test episode
+env_info = env.reset(train_mode=False)[brain_name]
+state = env_info.vector_observations[0]
+score = 0
+
+for _ in range(300):
+    action = agent.act(state)
+    env_info = env.step({brain_name: [action]})[brain_name]
+    state = env_info.vector_observations[0]
+    reward = env_info.rewards[0]
+    done = env_info.local_done[0]
+    score += reward
+    if done:
+        break
+
+print('Score:', score)
 ```
 
 ## Future Improvements
 
 Potential enhancements:
 - Prioritized Experience Replay
-- Dueling DQN architecture
-- Rainbow DQN (combination of improvements)
+- Noisy Networks for exploration
+- Multi-step learning (n-step returns)
+- Distributional RL (C51, QR-DQN)
+- Rainbow DQN (combination of all improvements)
 - Hyperparameter tuning
 - Learning from pixels (visual input)
 
