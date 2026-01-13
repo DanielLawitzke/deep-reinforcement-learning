@@ -1,0 +1,17 @@
+# Unity Environment
+Banana_Windows_x86_64/
+
+# Python
+__pycache__/
+*.pyc
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Model checkpoints
+checkpoint.pth
+*.pth
+
+# OS
+.DS_Store
+Thumbs.db
