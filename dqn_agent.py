@@ -85,10 +85,26 @@ class Agent():
         """
         states, actions, rewards, next_states, dones = experiences
 
-        ## TODO: compute and minimize the loss
-        "*** YOUR CODE HERE ***"
+        # Double DQN: Use local network to select actions, target network to evaluate them
+        # This reduces overestimation bias compared to vanilla DQN
+        best_actions = self.qnetwork_local(next_states).detach().argmax(1).unsqueeze(1)
+        Q_targets_next = self.qnetwork_target(next_states).detach().gather(1, best_actions)
+        
+        # Compute Q targets for current states using Bellman equation
+        Q_targets = rewards + (gamma * Q_targets_next * (1 - dones))
+        
+        # Get expected Q values from local model
+        Q_expected = self.qnetwork_local(states).gather(1, actions)
+        
+        # Compute loss (Mean Squared Error between expected and target Q values)
+        loss = F.mse_loss(Q_expected, Q_targets)
+        
+        # Minimize the loss
+        self.optimizer.zero_grad()
+        loss.backward()
+        self.optimizer.step()
 
-        # ------------------- update target network ------------------- #
+        # Update target network
         self.soft_update(self.qnetwork_local, self.qnetwork_target, TAU)                     
 
     def soft_update(self, local_model, target_model, tau):

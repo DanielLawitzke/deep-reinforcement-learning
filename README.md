@@ -1,55 +1,137 @@
-[//]: # (Image References)
+# Navigation - Banana Collector
 
-[image1]: https://user-images.githubusercontent.com/10624937/42135619-d90f2f28-7d12-11e8-8823-82b970a54d7e.gif "Trained Agent"
+Train an agent using Deep Q-Network (Double DQN) to collect yellow bananas while avoiding blue bananas in a Unity ML-Agents environment.
 
-# Project 1: Navigation
+**Trained on NVIDIA GeForce RTX 5080 - completed in under 30 minutes!**
 
-### Introduction
+## Project Overview
 
-For this project, you will train an agent to navigate (and collect bananas!) in a large, square world.  
+This project implements a Double DQN agent that learns to navigate a square world and collect yellow bananas (+1 reward) while avoiding blue bananas (-1 reward).
 
-![Trained Agent][image1]
+**Environment:**
+- State space: 37 dimensions (velocity + ray-based perception)
+- Action space: 4 discrete actions (forward, backward, left, right)
+- Goal: Average score >= 13.0 over 100 consecutive episodes
 
-A reward of +1 is provided for collecting a yellow banana, and a reward of -1 is provided for collecting a blue banana.  Thus, the goal of your agent is to collect as many yellow bananas as possible while avoiding blue bananas.  
+**Results:**
+- Solved in 449 episodes (4x faster than expected!)
+- Average test score: 12.40+
+- Implementation: Double DQN with Experience Replay
+- Hardware: NVIDIA GeForce RTX 5080 16GB
+- Training time: ~15 minutes
 
-The state space has 37 dimensions and contains the agent's velocity, along with ray-based perception of objects around agent's forward direction.  Given this information, the agent has to learn how to best select actions.  Four discrete actions are available, corresponding to:
-- **`0`** - move forward.
-- **`1`** - move backward.
-- **`2`** - turn left.
-- **`3`** - turn right.
+## Environment Setup
 
-The task is episodic, and in order to solve the environment, your agent must get an average score of +13 over 100 consecutive episodes.
+### Prerequisites
+- Python 3.9
+- Anaconda or Miniconda
+- NVIDIA GPU with CUDA support (tested on RTX 5080)
+- Windows, macOS, or Linux
 
-### Getting Started
+### Installation
 
-1. Download the environment from one of the links below.  You need only select the environment that matches your operating system:
-    - Linux: [click here](https://s3-us-west-1.amazonaws.com/udacity-drlnd/P1/Banana/Banana_Linux.zip)
-    - Mac OSX: [click here](https://s3-us-west-1.amazonaws.com/udacity-drlnd/P1/Banana/Banana.app.zip)
-    - Windows (32-bit): [click here](https://s3-us-west-1.amazonaws.com/udacity-drlnd/P1/Banana/Banana_Windows_x86.zip)
-    - Windows (64-bit): [click here](https://s3-us-west-1.amazonaws.com/udacity-drlnd/P1/Banana/Banana_Windows_x86_64.zip)
-    
-    (_For Windows users_) Check out [this link](https://support.microsoft.com/en-us/help/827218/how-to-determine-whether-a-computer-is-running-a-32-bit-version-or-64) if you need help with determining if your computer is running a 32-bit version or 64-bit version of the Windows operating system.
+1. Create and activate conda environment:
+```bash
+conda create --name drlnd python=3.9 -y
+conda activate drlnd
+```
 
-    (_For AWS_) If you'd like to train the agent on AWS (and have not [enabled a virtual screen](https://github.com/Unity-Technologies/ml-agents/blob/master/docs/Training-on-Amazon-Web-Service.md)), then please use [this link](https://s3-us-west-1.amazonaws.com/udacity-drlnd/P1/Banana/Banana_Linux_NoVis.zip) to obtain the environment.
+2. Install PyTorch with CUDA support:
+```bash
+conda install pytorch torchvision torchaudio pytorch-cuda=11.8 -c pytorch -c nvidia -y
+```
 
-2. Place the file in the course GitHub repository, in the `p1_navigation/` folder, and unzip (or decompress) the file. 
+3. Install dependencies:
+```bash
+pip install -r requirements.txt
+```
 
-### Instructions
+4. Download Unity Environment:
+   - [Windows (64-bit)](https://s3-us-west-1.amazonaws.com/udacity-drlnd/P1/Banana/Banana_Windows_x86_64.zip)
+   - [Mac OSX](https://s3-us-west-1.amazonaws.com/udacity-drlnd/P1/Banana/Banana.app.zip)
+   - [Linux](https://s3-us-west-1.amazonaws.com/udacity-drlnd/P1/Banana/Banana_Linux.zip)
 
-Follow the instructions in `Navigation.ipynb` to get started with training your own agent!  
+5. Extract the environment to the project directory:
+```
+p1_navigation/
+├── Banana_Windows_x86_64/
+│   └── Banana.exe
+├── model.py
+├── dqn_agent.py
+├── Navigation.ipynb
+└── ...
+```
 
-### (Optional) Challenge: Learning from Pixels
+## Training the Agent
 
-After you have successfully completed the project, if you're looking for an additional challenge, you have come to the right place!  In the project, your agent learned from information such as its velocity, along with ray-based perception of objects around its forward direction.  A more challenging task would be to learn directly from pixels!
+1. Start Jupyter Notebook:
+```bash
+jupyter notebook
+```
 
-To solve this harder task, you'll need to download a new Unity environment.  This environment is almost identical to the project environment, where the only difference is that the state is an 84 x 84 RGB image, corresponding to the agent's first-person view.  (**Note**: Udacity students should not submit a project with this new environment.)
+2. Open `Navigation.ipynb`
 
-You need only select the environment that matches your operating system:
-- Linux: [click here](https://s3-us-west-1.amazonaws.com/udacity-drlnd/P1/Banana/VisualBanana_Linux.zip)
-- Mac OSX: [click here](https://s3-us-west-1.amazonaws.com/udacity-drlnd/P1/Banana/VisualBanana.app.zip)
-- Windows (32-bit): [click here](https://s3-us-west-1.amazonaws.com/udacity-drlnd/P1/Banana/VisualBanana_Windows_x86.zip)
-- Windows (64-bit): [click here](https://s3-us-west-1.amazonaws.com/udacity-drlnd/P1/Banana/VisualBanana_Windows_x86_64.zip)
+3. Run cells sequentially:
+   - Import packages
+   - Initialize environment
+   - Initialize agent
+   - Define training function
+   - Start training with `scores = dqn()`
 
-Then, place the file in the `p1_navigation/` folder in the course GitHub repository, and unzip (or decompress) the file.  Next, open `Navigation_Pixels.ipynb` and follow the instructions to learn how to use the Python API to control the agent.
+Training takes approximately 20-60 minutes depending on hardware.
 
-(_For AWS_) If you'd like to train the agent on AWS, you must follow the instructions to [set up X Server](https://github.com/Unity-Technologies/ml-agents/blob/master/docs/Training-on-Amazon-Web-Service.md), and then download the environment for the **Linux** operating system above.
+**Note on RTX 5080:** PyTorch may show a warning about sm_120 compatibility, but training works perfectly and achieves excellent results.
+
+## Files
+
+- `model.py` - Neural network architecture (Q-Network)
+- `dqn_agent.py` - DQN agent implementation with Double DQN
+- `Navigation.ipynb` - Training notebook
+- `checkpoint.pth` - Saved model weights (created after training)
+- `requirements.txt` - Python dependencies
+
+## Algorithm
+
+The agent uses Double DQN with the following features:
+- Experience Replay (buffer size: 100,000)
+- Target Network (soft updates with tau=0.001)
+- Epsilon-greedy exploration (decay from 1.0 to 0.01)
+- Neural Network: 37 → 64 → 64 → 4
+- Learning rate: 0.0005
+- Batch size: 64
+- Discount factor (gamma): 0.99
+
+## Results
+
+Training progress:
+```
+Episode 100:   0.73
+Episode 200:   4.89
+Episode 300:   7.60
+Episode 400:  10.57
+Episode 500:  12.76
+Episode 549:  13.00 (Solved in 449 episodes)
+```
+
+The agent successfully learned to navigate and collect bananas in under 500 episodes.
+
+## Testing the Trained Agent
+
+Load saved weights and watch the agent:
+```python
+agent.qnetwork_local.load_state_dict(torch.load('checkpoint.pth'))
+# Run test episode
+```
+
+## Future Improvements
+
+Potential enhancements:
+- Prioritized Experience Replay
+- Dueling DQN architecture
+- Rainbow DQN (combination of improvements)
+- Hyperparameter tuning
+- Learning from pixels (visual input)
+
+## License
+
+This project is part of the Udacity Deep Reinforcement Learning Nanodegree.
