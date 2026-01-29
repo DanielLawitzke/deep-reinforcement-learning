@@ -1,112 +1,216 @@
-[//]: # (Image References)
+# Navigation - Banana Collector
 
-[image1]: https://user-images.githubusercontent.com/10624937/42135602-b0335606-7d12-11e8-8689-dd1cf9fa11a9.gif "Trained Agents"
-[image2]: https://user-images.githubusercontent.com/10624937/42386929-76f671f0-8106-11e8-9376-f17da2ae852e.png "Kernel"
+Train an agent using Deep Q-Network (Double DQN and Dueling DQN) to collect yellow bananas while avoiding blue bananas in a Unity ML-Agents environment.
 
-# Deep Reinforcement Learning Nanodegree
+**Trained on NVIDIA GeForce RTX 5080 - both variants completed in ~15 minutes!**
 
-![Trained Agents][image1]
+## Project Overview
 
-This repository contains material related to Udacity's [Deep Reinforcement Learning Nanodegree](https://www.udacity.com/course/deep-reinforcement-learning-nanodegree--nd893) program.  
+This project implements a Double DQN agent that learns to navigate a square world and collect yellow bananas (+1 reward) while avoiding blue bananas (-1 reward).
 
-## Table of Contents
+**Environment:**
+- State space: 37 dimensions (velocity + ray-based perception)
+- Action space: 4 discrete actions (forward, backward, left, right)
+- Goal: Average score >= 13.0 over 100 consecutive episodes
 
-### Tutorials
+**Implementations:**
+- Double DQN: Solved in 449 episodes
+- Dueling DQN: Solved in 414 episodes (about 8% faster)
+- Both way faster than expected baseline (~1800 episodes)
 
-The tutorials lead you through implementing various algorithms in reinforcement learning.  All of the code is in PyTorch (v0.4) and Python 3.
+**Hardware:**
+- NVIDIA GeForce RTX 5080 16GB
+- Training time: ~15 minutes per run
+- TensorBoard logging enabled
 
-* [Dynamic Programming](https://github.com/udacity/deep-reinforcement-learning/tree/master/dynamic-programming): Implement Dynamic Programming algorithms such as Policy Evaluation, Policy Improvement, Policy Iteration, and Value Iteration. 
-* [Monte Carlo](https://github.com/udacity/deep-reinforcement-learning/tree/master/monte-carlo): Implement Monte Carlo methods for prediction and control. 
-* [Temporal-Difference](https://github.com/udacity/deep-reinforcement-learning/tree/master/temporal-difference): Implement Temporal-Difference methods such as Sarsa, Q-Learning, and Expected Sarsa. 
-* [Discretization](https://github.com/udacity/deep-reinforcement-learning/tree/master/discretization): Learn how to discretize continuous state spaces, and solve the Mountain Car environment.
-* [Tile Coding](https://github.com/udacity/deep-reinforcement-learning/tree/master/tile-coding): Implement a method for discretizing continuous state spaces that enables better generalization.
-* [Deep Q-Network](https://github.com/udacity/deep-reinforcement-learning/tree/master/dqn): Explore how to use a Deep Q-Network (DQN) to navigate a space vehicle without crashing.
-* [Robotics](https://github.com/dusty-nv/jetson-reinforcement): Use a C++ API to train reinforcement learning agents from virtual robotic simulation in 3D. (_External link_)
-* [Hill Climbing](https://github.com/udacity/deep-reinforcement-learning/tree/master/hill-climbing): Use hill climbing with adaptive noise scaling to balance a pole on a moving cart.
-* [Cross-Entropy Method](https://github.com/udacity/deep-reinforcement-learning/tree/master/cross-entropy): Use the cross-entropy method to train a car to navigate a steep hill.
-* [REINFORCE](https://github.com/udacity/deep-reinforcement-learning/tree/master/reinforce): Learn how to use Monte Carlo Policy Gradients to solve a classic control task.
-* **Proximal Policy Optimization**: Explore how to use Proximal Policy Optimization (PPO) to solve a classic reinforcement learning task. (_Coming soon!_)
-* **Deep Deterministic Policy Gradients**: Explore how to use Deep Deterministic Policy Gradients (DDPG) with OpenAI Gym environments.
-  * [Pendulum](https://github.com/udacity/deep-reinforcement-learning/tree/master/ddpg-pendulum): Use OpenAI Gym's Pendulum environment.
-  * [BipedalWalker](https://github.com/udacity/deep-reinforcement-learning/tree/master/ddpg-bipedal): Use OpenAI Gym's BipedalWalker environment.
-* [Finance](https://github.com/udacity/deep-reinforcement-learning/tree/master/finance): Train an agent to discover optimal trading strategies.
+## Environment Setup
 
-### Labs / Projects
+### Prerequisites
+- Python 3.9
+- Anaconda or Miniconda
+- NVIDIA GPU with CUDA support (tested on RTX 5080)
+- Windows, macOS, or Linux
 
-The labs and projects can be found below.  All of the projects use rich simulation environments from [Unity ML-Agents](https://github.com/Unity-Technologies/ml-agents). In the [Deep Reinforcement Learning Nanodegree](https://www.udacity.com/course/deep-reinforcement-learning-nanodegree--nd893) program, you will receive a review of your project.  These reviews are meant to give you personalized feedback and to tell you what can be improved in your code.
+### Installation
 
-* [The Taxi Problem](https://github.com/udacity/deep-reinforcement-learning/tree/master/lab-taxi): In this lab, you will train a taxi to pick up and drop off passengers.
-* [Navigation](https://github.com/udacity/deep-reinforcement-learning/tree/master/p1_navigation): In the first project, you will train an agent to collect yellow bananas while avoiding blue bananas.
-* [Continuous Control](https://github.com/udacity/deep-reinforcement-learning/tree/master/p2_continuous-control): In the second project, you will train an robotic arm to reach target locations.
-* [Collaboration and Competition](https://github.com/udacity/deep-reinforcement-learning/tree/master/p3_collab-compet): In the third project, you will train a pair of agents to play tennis! 
+1. Create and activate conda environment:
+```bash
+conda create --name drlnd python=3.9 -y
+conda activate drlnd
+```
 
-### Resources
+2. Install PyTorch with CUDA support:
+```bash
+conda install pytorch torchvision torchaudio pytorch-cuda=11.8 -c pytorch -c nvidia -y
+```
 
-* [Cheatsheet](https://github.com/udacity/deep-reinforcement-learning/blob/master/cheatsheet): You are encouraged to use [this PDF file](https://github.com/udacity/deep-reinforcement-learning/blob/master/cheatsheet/cheatsheet.pdf) to guide your study of reinforcement learning. 
+3. Install dependencies:
+```bash
+pip install -r requirements.txt
+```
 
-## OpenAI Gym Benchmarks
+4. Download Unity Environment:
+   - [Windows (64-bit)](https://s3-us-west-1.amazonaws.com/udacity-drlnd/P1/Banana/Banana_Windows_x86_64.zip)
+   - [Mac OSX](https://s3-us-west-1.amazonaws.com/udacity-drlnd/P1/Banana/Banana.app.zip)
+   - [Linux](https://s3-us-west-1.amazonaws.com/udacity-drlnd/P1/Banana/Banana_Linux.zip)
 
-### Classic Control
-- `Acrobot-v1` with [Tile Coding](https://github.com/udacity/deep-reinforcement-learning/blob/master/tile-coding/Tile_Coding_Solution.ipynb) and Q-Learning  
-- `Cartpole-v0` with [Hill Climbing](https://github.com/udacity/deep-reinforcement-learning/blob/master/hill-climbing/Hill_Climbing.ipynb) | solved in 13 episodes
-- `Cartpole-v0` with [REINFORCE](https://github.com/udacity/deep-reinforcement-learning/blob/master/reinforce/REINFORCE.ipynb) | solved in 691 episodes 
-- `MountainCarContinuous-v0` with [Cross-Entropy Method](https://github.com/udacity/deep-reinforcement-learning/blob/master/cross-entropy/CEM.ipynb) | solved in 47 iterations
-- `MountainCar-v0` with [Uniform-Grid Discretization](https://github.com/udacity/deep-reinforcement-learning/blob/master/discretization/Discretization_Solution.ipynb) and Q-Learning | solved in <50000 episodes
-- `Pendulum-v0` with [Deep Deterministic Policy Gradients (DDPG)](https://github.com/udacity/deep-reinforcement-learning/blob/master/ddpg-pendulum/DDPG.ipynb)
+5. Extract the environment to the project directory:
+```
+p1_navigation/
+├── Banana_Windows_x86_64/
+│   └── Banana.exe
+├── model.py
+├── dqn_agent.py
+├── Navigation.ipynb
+└── ...
+```
 
-### Box2d
-- `BipedalWalker-v2` with [Deep Deterministic Policy Gradients (DDPG)](https://github.com/udacity/deep-reinforcement-learning/blob/master/ddpg-bipedal/DDPG.ipynb)
-- `CarRacing-v0` with **Deep Q-Networks (DQN)** | _Coming soon!_
-- `LunarLander-v2` with [Deep Q-Networks (DQN)](https://github.com/udacity/deep-reinforcement-learning/blob/master/dqn/solution/Deep_Q_Network_Solution.ipynb) | solved in 1504 episodes
+## Training the Agent
 
-### Toy Text
-- `FrozenLake-v0` with [Dynamic Programming](https://github.com/udacity/deep-reinforcement-learning/blob/master/dynamic-programming/Dynamic_Programming_Solution.ipynb)
-- `Blackjack-v0` with [Monte Carlo Methods](https://github.com/udacity/deep-reinforcement-learning/blob/master/monte-carlo/Monte_Carlo_Solution.ipynb)
-- `CliffWalking-v0` with [Temporal-Difference Methods](https://github.com/udacity/deep-reinforcement-learning/blob/master/temporal-difference/Temporal_Difference_Solution.ipynb)
+1. Start Jupyter Notebook:
+```bash
+jupyter notebook
+```
 
-## Dependencies
+2. Open `Navigation.ipynb`
 
-To set up your python environment to run the code in this repository, follow the instructions below.
+3. Run cells sequentially:
+   - Import packages
+   - Initialize environment
+   - Initialize agent
+   - Define training function
+   - Start training with `scores = dqn()`
 
-1. Create (and activate) a new environment with Python 3.6.
+Training takes approximately 20-60 minutes depending on hardware.
 
-	- __Linux__ or __Mac__: 
-	```bash
-	conda create --name drlnd python=3.6
-	source activate drlnd
-	```
-	- __Windows__: 
-	```bash
-	conda create --name drlnd python=3.6 
-	activate drlnd
-	```
-	
-2. If running in **Windows**, ensure you have the "Build Tools for Visual Studio 2019" installed from this [site](https://visualstudio.microsoft.com/downloads/).  This [article](https://towardsdatascience.com/how-to-install-openai-gym-in-a-windows-environment-338969e24d30) may also be very helpful.  This was confirmed to work in Windows 10 Home.  
+**Note on RTX 5080:** PyTorch may show a warning about sm_120 compatibility, but training works perfectly and achieves excellent results.
 
-3. Follow the instructions in [this repository](https://github.com/openai/gym) to perform a minimal install of OpenAI gym.  
-	- Next, install the **classic control** environment group by following the instructions [here](https://github.com/openai/gym#classic-control).
-	- Then, install the **box2d** environment group by following the instructions [here](https://github.com/openai/gym#box2d).
-	
-4. Clone the repository (if you haven't already!), and navigate to the `python/` folder.  Then, install several dependencies.  
-    ```bash
-    git clone https://github.com/udacity/deep-reinforcement-learning.git
-    cd deep-reinforcement-learning/python
-    pip install .
-    ```
+## Files
 
-5. Create an [IPython kernel](http://ipython.readthedocs.io/en/stable/install/kernel_install.html) for the `drlnd` environment.    
-    ```bash
-    python -m ipykernel install --user --name drlnd --display-name "drlnd"
-    ```
+- `model.py` - Neural network architecture (supports both standard and Dueling DQN)
+- `dqn_agent.py` - DQN agent implementation with Double DQN
+- `Navigation.ipynb` - Training notebook with TensorBoard support
+- `checkpoint_double_dqn.pth` - Trained weights for Double DQN (449 episodes)
+- `checkpoint_dueling_dqn.pth` - Trained weights for Dueling DQN (414 episodes)
+- `requirements.txt` - Python dependencies
+- `runs/` - TensorBoard logs
 
-6. Before running code in a notebook, change the kernel to match the `drlnd` environment by using the drop-down `Kernel` menu. 
+## Algorithm
 
-![Kernel][image2]
+Two implementations were tested:
 
-## Want to learn more?
+### Double DQN
+- Experience Replay (buffer size: 100,000)
+- Target Network (soft updates with tau=0.001)
+- Epsilon-greedy exploration (decay from 1.0 to 0.01)
+- Neural Network: 37 → 64 → 64 → 4
+- Learning rate: 0.0005
+- Batch size: 64
+- Discount factor (gamma): 0.99
 
-<p align="center">Come learn with us in the <a href="https://www.udacity.com/course/deep-reinforcement-learning-nanodegree--nd893">Deep Reinforcement Learning Nanodegree</a> program at Udacity!</p>
+### Dueling DQN
+Same hyperparameters as Double DQN, but with dueling architecture:
+- Splits final layer into Value stream (64 → 1) and Advantage stream (64 → 4)
+- Combines them using: Q(s,a) = V(s) + (A(s,a) - mean(A(s,a)))
+- This helps the network learn which states are valuable independent of actions
 
-<p align="center"><a href="https://www.udacity.com/course/deep-reinforcement-learning-nanodegree--nd893">
- <img width="503" height="133" src="https://user-images.githubusercontent.com/10624937/42135812-1829637e-7d16-11e8-9aa1-88056f23f51e.png"></a>
-</p>
+Both implementations use Double DQN (action selection from local network, evaluation from target network).
+
+## Results
+
+### Double DQN Training
+```
+Episode 100:   0.73
+Episode 200:   4.89
+Episode 300:   7.60
+Episode 400:  10.57
+Episode 500:  12.76
+Episode 549:  13.00 (Solved in 449 episodes)
+```
+
+### Dueling DQN Training
+```
+Episode 100:   0.65
+Episode 200:   4.30
+Episode 300:   7.62
+Episode 400:  10.81
+Episode 500:  12.63
+Episode 514:  13.01 (Solved in 414 episodes)
+```
+
+### Comparison
+
+Dueling DQN was about 35 episodes faster than Double DQN. Both learned pretty much at the same pace in the beginning, but Dueling reached the goal slightly faster. The performance difference isn't huge, which makes sense since both use the same core Double DQN algorithm - Dueling just adds the value/advantage split.
+
+Overall both implementations crushed the baseline. The RTX 5080 made training super fast.
+
+### Training Plots
+
+**Double DQN - Complete Training Curve:**
+
+![Double DQN Training](double_dqn_training.png)
+
+Training progression for Double DQN. Solved in 449 episodes with clear learning curve.
+
+**Dueling DQN - Complete Training Curve:**
+
+![Dueling DQN Training](dueling_dqn_training.png)
+
+Training progression for Dueling DQN. Solved in 414 episodes, slightly faster convergence.
+
+**TensorBoard Monitoring (Dueling DQN):**
+
+![Score Average](tensorboard_score_average.png)
+
+Average score smoothly increases from 0 to 13+ over 514 episodes.
+
+![Score per Episode](tensorboard_score_episode.png)
+
+Individual episode scores with variance. The smoothed line shows clear upward trend.
+
+![Epsilon Decay](tensorboard_epsilon.png)
+
+Exploration rate (epsilon) decreases from 1.0 to ~0.08 as the agent becomes more confident.
+
+## Testing the Trained Agent
+
+Load saved weights and watch the agent:
+```python
+# Load Double DQN weights (449 episodes)
+agent.qnetwork_local.load_state_dict(torch.load('checkpoint_double_dqn.pth'))
+
+# OR load Dueling DQN weights (414 episodes)
+agent.qnetwork_local.load_state_dict(torch.load('checkpoint_dueling_dqn.pth'))
+
+# Run test episode
+env_info = env.reset(train_mode=False)[brain_name]
+state = env_info.vector_observations[0]
+score = 0
+
+for _ in range(300):
+    action = agent.act(state)
+    env_info = env.step({brain_name: [action]})[brain_name]
+    state = env_info.vector_observations[0]
+    reward = env_info.rewards[0]
+    done = env_info.local_done[0]
+    score += reward
+    if done:
+        break
+
+print('Score:', score)
+```
+
+## Future Improvements
+
+Potential enhancements:
+- Prioritized Experience Replay
+- Noisy Networks for exploration
+- Multi-step learning (n-step returns)
+- Distributional RL (C51, QR-DQN)
+- Rainbow DQN (combination of all improvements)
+- Hyperparameter tuning
+- Learning from pixels (visual input)
+
+## License
+
+This project is part of the Udacity Deep Reinforcement Learning Nanodegree.
