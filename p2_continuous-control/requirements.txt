@@ -1,0 +1,5 @@
+unityagents==0.4.0
+numpy
+matplotlib
+torch
+tensorboard
