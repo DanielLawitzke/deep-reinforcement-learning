@@ -1,13 +1,28 @@
-# Unity Environment
-Banana_Windows_x86_64/
+# Unity Environment (große Binaries)
+Reacher_Windows_x86_64/
+
+# TensorBoard Logs
+runs/
 
 # Python
 __pycache__/
+*.py[cod]
 *.pyc
+*.pyo
 
 # Jupyter
 .ipynb_checkpoints/
+_pycache_/
+
+# IDEs
+.vscode/
+.idea/
 
 # OS
 .DS_Store
 Thumbs.db
+
+# Unity Logs
+unity-environment.log
+# Anaconda
+anaconda_projects/

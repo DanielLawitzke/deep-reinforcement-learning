@@ -1,88 +1,253 @@
-[//]: # (Image References)
+# Continuous Control with DDPG
 
-[image1]: https://user-images.githubusercontent.com/10624937/43851024-320ba930-9aff-11e8-8493-ee547c6af349.gif "Trained Agent"
-[image2]: https://user-images.githubusercontent.com/10624937/43851646-d899bf20-9b00-11e8-858c-29b5c2c94ccc.png "Crawler"
+![Training Results](training_plot.png)
 
+Training a robotic arm to reach and maintain target positions using deep reinforcement learning.
 
-# Project 2: Continuous Control
+## Project Goal
 
-### Introduction
+Train a DDPG agent to control a double-jointed robotic arm in Unity's Reacher environment. The arm should keep its end effector within a moving target zone as long as possible.
 
-For this project, you will work with the [Reacher](https://github.com/Unity-Technologies/ml-agents/blob/master/docs/Learning-Environment-Examples.md#reacher) environment.
+Environment: Unity ML-Agents Reacher (Version 2 with 20 parallel agents)  
+Target: Average score of 30.0 or higher over 100 consecutive episodes  
+Result: Solved in 216 episodes (final score 30.01)
 
-![Trained Agent][image1]
+---
 
-In this environment, a double-jointed arm can move to target locations. A reward of +0.1 is provided for each step that the agent's hand is in the goal location. Thus, the goal of your agent is to maintain its position at the target location for as many time steps as possible.
+## Results
 
-The observation space consists of 33 variables corresponding to position, rotation, velocity, and angular velocities of the arm. Each action is a vector with four numbers, corresponding to torque applicable to two joints. Every entry in the action vector should be a number between -1 and 1.
+| Metric | Value |
+|--------|-------|
+| Episodes | 216 |
+| Final Score | 30.01 |
+| Training Time | ~1 hour |
+| Hardware | NVIDIA RTX 5080 |
 
-### Distributed Training
+### Training Curves
 
-For this project, we will provide you with two separate versions of the Unity environment:
-- The first version contains a single agent.
-- The second version contains 20 identical agents, each with its own copy of the environment.  
+![Moving Average](score_average.png)
 
-The second version is useful for algorithms like [PPO](https://arxiv.org/pdf/1707.06347.pdf), [A3C](https://arxiv.org/pdf/1602.01783.pdf), and [D4PG](https://openreview.net/pdf?id=SyZipzbCb) that use multiple (non-interacting, parallel) copies of the same agent to distribute the task of gathering experience.  
+100-episode moving average crossed target at episode 216
 
-### Solving the Environment
+![Episode Scores](score_episode.png)
 
-Note that your project submission need only solve one of the two versions of the environment. 
+Individual episode scores showing steady improvement
 
-#### Option 1: Solve the First Version
+![Noise Schedule](noise_scale.png)
 
-The task is episodic, and in order to solve the environment,  your agent must get an average score of +30 over 100 consecutive episodes.
+Noise decay enabling exploration-to-exploitation transition
 
-#### Option 2: Solve the Second Version
+---
 
-The barrier for solving the second version of the environment is slightly different, to take into account the presence of many agents.  In particular, your agents must get an average score of +30 (over 100 consecutive episodes, and over all agents).  Specifically,
-- After each episode, we add up the rewards that each agent received (without discounting), to get a score for each agent.  This yields 20 (potentially different) scores.  We then take the average of these 20 scores. 
-- This yields an **average score** for each episode (where the average is over all 20 agents).
+## Environment Details
 
-The environment is considered solved, when the average (over 100 episodes) of those average scores is at least +30. 
+### State Space
+- **Dimension**: 33 continuous variables
+- **Contains**: Position, rotation, velocity, and angular velocity of the arm
 
-### Getting Started
+### Action Space
+- **Dimension**: 4 continuous actions (range [-1, 1])
+- **Controls**: Torque applied to the two joints
 
-1. Download the environment from one of the links below.  You need only select the environment that matches your operating system:
+### Rewards
+- **+0.1** for each timestep the end effector is in the target zone
+- **Goal**: Maximize cumulative reward by staying in target
 
-    - **_Version 1: One (1) Agent_**
-        - Linux: [click here](https://s3-us-west-1.amazonaws.com/udacity-drlnd/P2/Reacher/one_agent/Reacher_Linux.zip)
-        - Mac OSX: [click here](https://s3-us-west-1.amazonaws.com/udacity-drlnd/P2/Reacher/one_agent/Reacher.app.zip)
-        - Windows (32-bit): [click here](https://s3-us-west-1.amazonaws.com/udacity-drlnd/P2/Reacher/one_agent/Reacher_Windows_x86.zip)
-        - Windows (64-bit): [click here](https://s3-us-west-1.amazonaws.com/udacity-drlnd/P2/Reacher/one_agent/Reacher_Windows_x86_64.zip)
+### Success Criteria
+- Average score ≥30 over 100 consecutive episodes
+- With 20 agents: Average across all agents per episode, then average over 100 episodes
 
-    - **_Version 2: Twenty (20) Agents_**
-        - Linux: [click here](https://s3-us-west-1.amazonaws.com/udacity-drlnd/P2/Reacher/Reacher_Linux.zip)
-        - Mac OSX: [click here](https://s3-us-west-1.amazonaws.com/udacity-drlnd/P2/Reacher/Reacher.app.zip)
-        - Windows (32-bit): [click here](https://s3-us-west-1.amazonaws.com/udacity-drlnd/P2/Reacher/Reacher_Windows_x86.zip)
-        - Windows (64-bit): [click here](https://s3-us-west-1.amazonaws.com/udacity-drlnd/P2/Reacher/Reacher_Windows_x86_64.zip)
-    
-    (_For Windows users_) Check out [this link](https://support.microsoft.com/en-us/help/827218/how-to-determine-whether-a-computer-is-running-a-32-bit-version-or-64) if you need help with determining if your computer is running a 32-bit version or 64-bit version of the Windows operating system.
+---
 
-    (_For AWS_) If you'd like to train the agent on AWS (and have not [enabled a virtual screen](https://github.com/Unity-Technologies/ml-agents/blob/master/docs/Training-on-Amazon-Web-Service.md)), then please use [this link](https://s3-us-west-1.amazonaws.com/udacity-drlnd/P2/Reacher/one_agent/Reacher_Linux_NoVis.zip) (version 1) or [this link](https://s3-us-west-1.amazonaws.com/udacity-drlnd/P2/Reacher/Reacher_Linux_NoVis.zip) (version 2) to obtain the "headless" version of the environment.  You will **not** be able to watch the agent without enabling a virtual screen, but you will be able to train the agent.  (_To watch the agent, you should follow the instructions to [enable a virtual screen](https://github.com/Unity-Technologies/ml-agents/blob/master/docs/Training-on-Amazon-Web-Service.md), and then download the environment for the **Linux** operating system above._)
+## Getting Started
 
-2. Place the file in the DRLND GitHub repository, in the `p2_continuous-control/` folder, and unzip (or decompress) the file. 
+### Prerequisites
 
-### Instructions
+```bash
+# Create conda environment
+conda create -n drlnd python=3.8
+conda activate drlnd
 
-Follow the instructions in `Continuous_Control.ipynb` to get started with training your own agent!  
+# Install dependencies
+pip install unityagents==0.4.0
+pip install torch torchvision
+pip install matplotlib tensorboard
+```
 
-### (Optional) Challenge: Crawler Environment
+### Download Unity Environment
 
-After you have successfully completed the project, you might like to solve the more difficult **Crawler** environment.
+Download the appropriate version for your operating system:
+- [Windows (64-bit)](https://s3-us-west-1.amazonaws.com/udacity-drlnd/P2/Reacher/Reacher_Windows_x86_64.zip)
+- [Linux](https://s3-us-west-1.amazonaws.com/udacity-drlnd/P2/Reacher/Reacher_Linux.zip)
+- [Mac OSX](https://s3-us-west-1.amazonaws.com/udacity-drlnd/P2/Reacher/Reacher.app.zip)
 
-![Crawler][image2]
+Extract to: `p2_continuous-control/Reacher_Windows_x86_64/` (or your OS equivalent)
 
-In this continuous control environment, the goal is to teach a creature with four legs to walk forward without falling.  
+### Training
 
-You can read more about this environment in the ML-Agents GitHub [here](https://github.com/Unity-Technologies/ml-agents/blob/master/docs/Learning-Environment-Examples.md#crawler).  To solve this harder task, you'll need to download a new Unity environment.  (**Note**: Udacity students should not submit a project with this new environment.)
+```bash
+# Start Jupyter
+jupyter notebook
 
-You need only select the environment that matches your operating system:
-- Linux: [click here](https://s3-us-west-1.amazonaws.com/udacity-drlnd/P2/Crawler/Crawler_Linux.zip)
-- Mac OSX: [click here](https://s3-us-west-1.amazonaws.com/udacity-drlnd/P2/Crawler/Crawler.app.zip)
-- Windows (32-bit): [click here](https://s3-us-west-1.amazonaws.com/udacity-drlnd/P2/Crawler/Crawler_Windows_x86.zip)
-- Windows (64-bit): [click here](https://s3-us-west-1.amazonaws.com/udacity-drlnd/P2/Crawler/Crawler_Windows_x86_64.zip)
+# Open Continuous_Control.ipynb
+# Run all cells to train the agent
+```
 
-Then, place the file in the `p2_continuous-control/` folder in the DRLND GitHub repository, and unzip (or decompress) the file.  Next, open `Crawler.ipynb` and follow the instructions to learn how to use the Python API to control the agent.
+Training takes approximately 1 hour on RTX 5080.
 
-(_For AWS_) If you'd like to train the agent on AWS (and have not [enabled a virtual screen](https://github.com/Unity-Technologies/ml-agents/blob/master/docs/Training-on-Amazon-Web-Service.md)), then please use [this link](https://s3-us-west-1.amazonaws.com/udacity-drlnd/P2/Crawler/Crawler_Linux_NoVis.zip) to obtain the "headless" version of the environment.  You will **not** be able to watch the agent without enabling a virtual screen, but you will be able to train the agent.  (_To watch the agent, you should follow the instructions to [enable a virtual screen](https://github.com/Unity-Technologies/ml-agents/blob/master/docs/Training-on-Amazon-Web-Service.md), and then download the environment for the **Linux** operating system above._)
+### Using Trained Weights
 
+```python
+from ddpg_agent import Agent
+
+# Load trained agent
+agent = Agent(state_size=33, action_size=4, random_seed=0)
+agent.actor_local.load_state_dict(torch.load('checkpoint_actor.pth'))
+agent.critic_local.load_state_dict(torch.load('checkpoint_critic.pth'))
+
+# Use agent for inference
+actions = agent.act(states, add_noise=False)
+```
+
+---
+
+## Algorithm: DDPG
+
+**Deep Deterministic Policy Gradient** - Actor-Critic algorithm for continuous control
+
+### Core Components
+
+- **Actor Network**: μ(s|θ) → Learns deterministic policy  
+- **Critic Network**: Q(s,a|w) → Evaluates state-action pairs  
+- **Experience Replay**: 1M buffer for breaking temporal correlations  
+- **Target Networks**: Soft updates (τ=0.001) for stable training  
+- **OU Noise**: Temporally correlated exploration with decay schedule
+
+### Network Architecture
+
+**Actor**: `State(33) → FC(400) → ReLU → FC(300) → ReLU → Action(4) → tanh`  
+**Critic**: `[State(33) → FC(400) → ReLU] + [Action(4)] → FC(300) → ReLU → Q(1)`
+
+### Key Hyperparameters
+
+| Parameter | Value | Purpose |
+|-----------|-------|---------|
+| BUFFER_SIZE | 1,000,000 | Large experience replay |
+| BATCH_SIZE | 256 | GPU-efficient batch size |
+| LR_ACTOR | 1e-4 | Actor learning rate |
+| LR_CRITIC | 1e-3 | Critic learning rate |
+| noise_decay | 0.99 | Exploration schedule |
+| learn_every | 20 | Update frequency |
+| learn_times | 15 | Updates per step |
+
+See `Report.md` for complete details.
+
+---
+
+## Critical Bug Fixes
+
+Two implementation bugs prevented convergence and were fixed:
+
+### Bug 1: OU Noise Implementation
+**Problem**: Used `random.random()` (0-1) instead of centered Gaussian  
+**Fix**: Changed to `np.random.standard_normal()` for zero-mean noise  
+**Impact**: Without fix, score plateaued at 0.8-2.0
+
+### Bug 2: Noise Application
+**Problem**: Double noise + multiplication instead of addition  
+**Fix**: Manual noise control with proper decay schedule  
+**Impact**: Enabled smooth exploration-to-exploitation transition
+
+**Result**: With fixes applied, training succeeded with exponential growth!
+
+See `Report.md` for detailed technical analysis.
+
+---
+
+## Repository Structure
+
+```
+p2_continuous-control/
+├── Continuous_Control.ipynb    # Main training notebook
+├── ddpg_agent.py              # DDPG agent (with bug fixes)
+├── model.py                   # Actor & Critic networks
+├── checkpoint_actor.pth       # Trained actor weights
+├── checkpoint_critic.pth      # Trained critic weights
+├── Report.md                  # Detailed technical report
+├── README.md                  # This file
+└── Reacher_Windows_x86_64/    # Unity environment
+```
+
+---
+
+## Performance Analysis
+
+### Training Progression
+
+| Phase | Episodes | Score | Characteristic |
+|-------|----------|-------|----------------|
+| 1 | 0-50 | 0→3.44 | Rapid initial learning |
+| 2 | 50-100 | 3.44→9.37 | Accelerated improvement |
+| 3 | 100-150 | 9.37→20.23 | Exponential growth |
+| 4 | 150-216 | 20.23→30.01 | Final convergence |
+
+### Key Observations
+
+- Smooth exponential curve, no catastrophic forgetting
+- Stable convergence, maintained score after reaching target
+- Solved in 216 episodes
+- No plateau failures unlike attempts without bug fixes
+
+---
+
+## Future Improvements
+
+### Short Term
+- **TD3**: Twin critics + delayed updates for stability
+- **PER**: Prioritized experience replay for faster learning
+- **Larger networks**: 4-5 layers for better capacity
+
+### Long Term
+- **SAC**: Soft Actor-Critic for better exploration
+- **PPO**: Alternative on-policy approach
+- **Parallel environments**: 4-10x training speedup
+- **Transfer learning**: Multi-task or curriculum learning
+
+See `Report.md` for detailed discussion of future work.
+
+---
+
+## Key Learnings
+
+1. **Implementation details are critical** - Two small bugs completely prevented convergence
+2. **Debugging RL is challenging** - Required systematic testing and analysis
+3. **Noise scheduling matters** - Balance between exploration and exploitation is key
+4. **DDPG works well when correct** - Clean, efficient algorithm for continuous control
+
+---
+
+## References
+
+- [DDPG Paper (Lillicrap et al. 2016)](https://arxiv.org/abs/1509.02971)
+- [Unity ML-Agents](https://github.com/Unity-Technologies/ml-agents)
+- [Udacity Deep RL Nanodegree](https://www.udacity.com/course/deep-reinforcement-learning-nanodegree--nd893)
+- [OpenAI Spinning Up](https://spinningup.openai.com/en/latest/algorithms/ddpg.html)
+
+---
+
+## Acknowledgments
+
+- **Udacity** for the Deep RL Nanodegree program
+- **Unity Technologies** for ML-Agents toolkit
+- **OpenAI** for foundational RL research
+- **Claude (Anthropic)** for debugging assistance
+
+---
+
+## License
+
+This project is part of Udacity's Deep Reinforcement Learning Nanodegree.
+
+---
+
+Deep Reinforcement Learning Nanodegree - Januar 2026
